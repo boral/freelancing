@@ -85,6 +85,16 @@ app_body =  dashboardBody(
                     
                )
                
+             ),
+             
+             fluidRow(
+               
+               box( title = 'My Asset Classes', status = 'success', collapsible = T, width = 12, solidHeader = T,
+                    
+                    column( 12, DT::dataTableOutput( outputId = "my_asset_class_df" ), style = "height:500px; overflow-y: scroll;overflow-x: scroll;" )
+                    
+               )
+               
              )
              
     ),
@@ -103,7 +113,7 @@ app_body =  dashboardBody(
                     
                     column( 2, textInput( 'add_lease_lease_id', 'Lease ID' ) ),
                     
-                    column( 2, selectInput( 'add_lease_asset_class', 'Asset Class', choices = c( 'a' = 'a' ) ) ),
+                    column( 2, selectInput( 'add_lease_asset_class', 'Asset Class', choices = my_asset_class_stored[['Asset Class']] ) ),
                     
                     column( 2, textInput( 'add_lease_lessor_name', 'Lessor Name' ) ),
                     
@@ -137,9 +147,15 @@ app_body =  dashboardBody(
                                             
                                             choices = c( 'End' = 'end', 'Beginning' = 'beginning' ) ) ),
                     
+                    column( 2, numericInput( 'add_lease_dismantling_cost', 'Dismantling Cost', value = 0 ) ),
+                    
+                    column( 2, dateInput( 'add_lease_date_of_dismantling', 'Date of Dismantling' ) ),
+                    
+                    column( 2, numericInput( 'add_lease_residual_guarantee_payments', 'Residual Guarantee Payments', value = 0 ) ),
+                    
                     column( 2, selectInput( 'add_lease_avail_exemption', 'Avail Exemption', 
                                             
-                                            choices = c( 'Yes' = 'yes', 'No' = 'no' ) ) ),
+                                            choices = c( 'No' = 'no', 'Yes' = 'yes' ) ) ),
                     
                     column( 2, selectInput( 'add_lease_exemption_type', 'Exemption Type', 
                                             
