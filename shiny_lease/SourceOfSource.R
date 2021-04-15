@@ -1,4 +1,4 @@
-rm( list = ls() )
+rm( list = ls() ) ; options( scipen = 999 )
 
 library( shiny ) ; library( shinydashboard ) ; library( dplyr ) ; library( data.table )
 
@@ -35,4 +35,9 @@ if( !file.exists( 'my_lease_df_stored.csv' ) ){
 }
 
 my_cashflow_df_stored = Generate_Cash_Flows( tail( my_lease_df_stored, 1 ) )
+
+# asset_right_of_use_df = Generate_Asset_Right_to_Use( my_cashflow_df_stored )
+
+
+
 

@@ -6,18 +6,25 @@ app_sidebar =  dashboardSidebar( collapsed = F,
                                        
                                 sidebarMenu(
 
-                                  menuItem( strong( '  Admin' ), tabName = 'admin' ),
+                              #    menuItem( strong( '  Admin' ), tabName = 'admin' ),
                                   
                                   menuItem( strong( '  Asset Class' ), tabName = 'asset_class' ),
                                   
                                   menuItem( strong( '  Lease' ), startExpanded = TRUE,
                                             
-                                           menuSubItem( 'My Lease', tabName = 'my_lease' )
+                                           menuSubItem( 'My Lease', tabName = 'my_lease', selected = T )
                                   ),
                                   
                                   menuItem( strong( '  Cash Flows' ), startExpanded = TRUE,
                                             
                                             menuSubItem( 'My Cash Flows', tabName = 'my_cash_flows' )
+                                  ),
+                                  
+                                  menuItem( strong( '  Calculations' ), startExpanded = TRUE,
+                                            
+                                            menuSubItem( 'Asset Right-of-Use', tabName = 'asset_right_of_use' ),
+                                            
+                                            menuSubItem( 'Lease Liability', tabName = 'lease_liability' )
                                   )
                                          
                                 )
@@ -107,9 +114,9 @@ app_body =  dashboardBody(
                     
                     column( 2, textInput( 'add_lease_company', 'Company' ) ),
                     
-                    column( 2, dateInput( 'add_lease_valuation_date', 'Valuation Date' ) ),
+                    column( 2, dateInput( 'add_lease_valuation_date', 'Valuation Date', format = 'dd-mm-yyyy' ) ),
                     
-                    column( 2, dateInput( 'add_lease_initial_application_date', 'Initial Application Date' ) ),
+                    column( 2, dateInput( 'add_lease_initial_application_date', 'Initial Application Date', format = 'dd-mm-yyyy' ) ),
                     
                     column( 2, textInput( 'add_lease_lease_id', 'Lease ID' ) ),
                     
@@ -119,13 +126,13 @@ app_body =  dashboardBody(
                     
                     column( 2, textAreaInput( 'add_lease_address', 'Address' ) ),
                     
-                    column( 2, dateInput( 'add_lease_start_date', 'Start Date' ) ),
+                    column( 2, dateInput( 'add_lease_start_date', 'Start Date', format = 'dd-mm-yyyy' ) ),
                     
-                    column( 2, dateInput( 'add_lease_end_date', 'End Date' ) ),
+                    column( 2, dateInput( 'add_lease_end_date', 'End Date', format = 'dd-mm-yyyy' ) ),
                     
                     column( 2, numericInput( 'add_lease_upfront_payments', 'Upfront Payments', value = 0 ) ),
                     
-                    column( 2, dateInput( 'add_lease_rent_effective_date', 'Rent Effective Date' ) ),
+                    column( 2, dateInput( 'add_lease_rent_effective_date', 'Rent Effective Date', format = 'dd-mm-yyyy' ) ),
                     
                     column( 2, numericInput( 'add_lease_rent', 'Rent', value = 0 ) ),
                     
@@ -149,7 +156,7 @@ app_body =  dashboardBody(
                     
                     column( 2, numericInput( 'add_lease_dismantling_cost', 'Dismantling Cost', value = 0 ) ),
                     
-                    column( 2, dateInput( 'add_lease_date_of_dismantling', 'Date of Dismantling' ) ),
+                    column( 2, dateInput( 'add_lease_date_of_dismantling', 'Date of Dismantling', format = 'dd-mm-yyyy' ) ),
                     
                     column( 2, numericInput( 'add_lease_residual_guarantee_payments', 'Residual Guarantee Payments', value = 0 ) ),
                     
@@ -183,6 +190,24 @@ app_body =  dashboardBody(
              
              fluidRow(
                
+               box( title = 'Upload My Lease', status = 'success', width = 12, solidHeader = T, collapsible = T,
+                    
+                    column( 8, fileInput( 'my_lease', 'Upload lease file' ) ), br(),
+                    
+                    column( 2, align = 'left',
+                            
+                            actionButton( 'my_lease_upload_button', 'SUBMIT' ),
+                            
+                            tags$style( "#my_lease_upload_button { vertical-align: middle; height: 30px; width: 70%; font-size: 15px;color: white;background-color:#1B618D;border-color: #374645 }" )
+                            
+                    )
+                    
+               )
+               
+             ),
+             
+             fluidRow(
+               
                box( title = 'My Lease', status = 'success', collapsible = T, width = 12, solidHeader = T,
                     
                     column( 12, DT::dataTableOutput( outputId = "my_lease_df" ), style = "height:500px; overflow-y: scroll;overflow-x: scroll;" )
@@ -200,6 +225,30 @@ app_body =  dashboardBody(
                box( title = 'My Cash Flows', status = 'success', collapsible = T, width = 12, solidHeader = T,
                     
                     DT::dataTableOutput( outputId = "my_cash_flows_df" ) )
+               
+             )
+             
+    ),
+    
+    tabItem( tabName = 'asset_right_of_use',
+             
+             fluidRow(
+               
+               box( title = 'Asset Right-of-Use', status = 'success', collapsible = T, width = 12, solidHeader = T,
+                    
+                    DT::dataTableOutput( outputId = "asset_right_of_use_df" ) )
+               
+             )
+             
+    ),
+    
+    tabItem( tabName = 'lease_liability',
+             
+             fluidRow(
+               
+               box( title = 'Lease Liability', status = 'success', collapsible = T, width = 12, solidHeader = T,
+                    
+                    DT::dataTableOutput( outputId = "lease_liability_df" ) )
                
              )
              

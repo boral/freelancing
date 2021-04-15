@@ -48,40 +48,50 @@ output$my_lease_df = DT::renderDT({
 
 observeEvent( input$add_lease_submit_button, {
   
-  my_lease_df_input = data.table( 'Company' = input$add_lease_company, 'Valuation Date' = input$add_lease_valuation_date,
+  my_lease_df_input = data.table( 'Company' = input$add_lease_company, 'Valuation_Date' = input$add_lease_valuation_date,
                                   
-                                  'Initial Application Date' = input$add_lease_initial_application_date, 'Lease ID' = input$add_lease_lease_id,
+                                  'Initial_Application_Date' = input$add_lease_initial_application_date, 'Lease_ID' = input$add_lease_lease_id,
                                   
-                                  'Asset Class' = input$add_lease_asset_class, 'Lessor Name' = input$add_lease_lessor_name,
+                                  'Asset_Class' = input$add_lease_asset_class, 'Lessor_Name' = input$add_lease_lessor_name,
                                   
-                                  'Address' = input$add_lease_address, 'Start Date' = input$add_lease_start_date,
+                                  'Address' = input$add_lease_address, 'Start_Date' = input$add_lease_start_date,
                                   
-                                  'End Date' = input$add_lease_end_date, 'Upfront Payments' = input$add_lease_upfront_payments,
+                                  'End_Date' = input$add_lease_end_date, 'Upfront_Payments' = input$add_lease_upfront_payments,
                                   
-                                  'Rent Effective Date' = input$add_lease_rent_effective_date, 'Rent' = input$add_lease_rent,
+                                  'Rent_Effective_Date' = input$add_lease_rent_effective_date, 'Rent' = input$add_lease_rent,
                                   
-                                  'GST (%)' = input$add_lease_gst, 'Incremental Borrowing Rate (%)' = input$add_lease_incremental_borrowing_rate,
+                                  'GST_perc' = input$add_lease_gst, 'Incremental_Borrowing_Rate_perc' = input$add_lease_incremental_borrowing_rate,
                                   
-                                  'Escalation Percent (%)' = input$add_lease_escalation_percent, 'Escalation Tenure' = input$add_lease_escalation_tenure,
+                                  'Escalation_Percent' = input$add_lease_escalation_percent, 'Escalation_Tenure' = input$add_lease_escalation_tenure,
                                   
-                                  'Lease Payment Frequency' = input$add_lease_lease_payment_freq, 'Lease Payable At' = input$add_lease_lease_payable_at,
+                                  'Lease_Payment_Frequency' = input$add_lease_lease_payment_freq, 'Lease_Payable_At' = input$add_lease_lease_payable_at,
                                   
-                                  'Dismantling Cost' = input$add_lease_dismantling_cost, 'Date of Dismantling' = input$add_lease_date_of_dismantling,
+                                  'Dismantling_Cost' = input$add_lease_dismantling_cost, 'Date_of_Dismantling' = input$add_lease_date_of_dismantling,
                                   
-                                  'Residual Guarantee Payments' = input$add_lease_residual_guarantee_payments,
+                                  'Residual_Guarantee_Payments' = input$add_lease_residual_guarantee_payments,
                                   
-                                  'Avail Exemption' = input$add_lease_avail_exemption, 'Exemption Type' = input$add_lease_exemption_type,
+                                  'Avail_Exemption' = input$add_lease_avail_exemption, 'Exemption_Type' = input$add_lease_exemption_type,
                                   
-                                  'Transition Method' = input$add_lease_transition_method, 'Credit Rating' = input$add_lease_credit_rating,
+                                  'Transition_Method' = input$add_lease_transition_method, 'Credit_Rating' = input$add_lease_credit_rating,
                                   
-                                  'Use Cash Flow' = input$add_lease_use_cash_flow )
+                                  'Use_Cash_Flow' = input$add_lease_use_cash_flow )
   
   updated_my_lease_df = bind_rows( RV$my_lease_df_final, my_lease_df_input )
   
-  fwrite( updated_my_lease_df, 'my_lease_df_stored.csv' )
+  write.csv( updated_my_lease_df, 'my_lease_df_stored.csv', stringAsFactors = F )
 
   RV$my_lease_df_final = fread( 'my_lease_df_stored.csv' )
   
+})
+
+observeEvent( input$my_lease_upload_button, {
+
+  uploaded_my_lease_df = read.csv( input$my_lease$datapath )
+
+  fwrite( uploaded_my_lease_df, 'my_lease_df_stored.csv' )
+
+  RV$my_lease_df_final = fread( 'my_lease_df_stored.csv' )
+
 })
 
 
@@ -102,8 +112,154 @@ observeEvent( input$add_lease_submit_button, {
 
 })
 
+observeEvent( input$my_lease_upload_button, {
+
+  RV_cashflow$my_cashflow_df_final = Generate_Cash_Flows( tail( RV$my_lease_df_final, 1 ) )
+
+})
 
 
+#..... Generating Asset - Right to use table ....
+
+#... asset_right_of_use_df_0 = my_cashflow_df_stored
+
+output$asset_right_of_use_df = DT::renderDT({
+
+  asset_right_of_use_df_0 = RV_cashflow$my_cashflow_df_final
+  
+  asset_right_of_use_df_1_firstrow = data.table( LeaseID = asset_right_of_use_df_0$LeaseId[2], Installment = asset_right_of_use_df_0$Date[1],
+                                        
+                                        'Date' = 0, 'Right to Use Balance' = tail( asset_right_of_use_df_0$Present_Value, 1 ),
+                                        
+                                        'Amortisation of RTU' = 0, 'Right to use Closing Balance' = tail( asset_right_of_use_df_0$Present_Value, 1 ),
+                                        
+                                        'Debit Account' = 'Right to Use', 'Credit Account' = 'Lease Liability' )
+  
+  asset_right_of_use_df_1_next_rows = tail( asset_right_of_use_df_0, -1 ) %>% filter( Type == 'Rent' )
+  
+  asset_right_of_use_df_2 = data.table( LeaseID = asset_right_of_use_df_1_next_rows$LeaseId, Installment = asset_right_of_use_df_1_next_rows$Date,
+                                        
+                                        Date = seq.int( 1, nrow( asset_right_of_use_df_1_next_rows ), 1 ),
+                                        
+                                        'Amortisation of RTU' = asset_right_of_use_df_1_next_rows$Amortization,
+                                        
+                                        'Debit Account' = 'Depreciation', 'Credit Account' = 'Right to Use' ) %>%
+    
+                           mutate( 'Right to use Closing Balance' = tail( asset_right_of_use_df_0$Present_Value, 1 ) - cumsum( .$'Amortisation of RTU' ) ) %>%
+  
+                           mutate( 'Right to Use Balance' = shift( .$'Right to use Closing Balance' ) )
+  
+  asset_right_of_use_df_2[[ 'Right to use Closing Balance' ]][ nrow( asset_right_of_use_df_2 ) ] = 0
+  
+  asset_right_of_use_df_2[[ 'Right to Use Balance' ]][1] = tail( asset_right_of_use_df_0$Present_Value, 1 )
+  
+  asset_right_of_use_df_2$Date = seq.int( 1, nrow( asset_right_of_use_df_2 ), 1 )
+  
+  asset_right_of_use_df_3 = asset_right_of_use_df_2 %>% dplyr::select( names( asset_right_of_use_df_1_firstrow ) )
+  
+  asset_right_of_use_df_4 = bind_rows( asset_right_of_use_df_1_firstrow, asset_right_of_use_df_3 )
+  
+  asset_right_of_use_df_4$Amount = asset_right_of_use_df_4[[ 'Right to Use Balance' ]]
+  
+  #.... Total row ....
+  
+  total_df = data.table( LeaseID = 'Total', Installment = asset_right_of_use_df_4$Installment[1], Date = NA, 
+                         
+                         'Right to Use Balance' = NA, 'Amortisation of RTU' = sum( asset_right_of_use_df_4[["Amortisation of RTU"]] ), 
+                         
+                         'Right to use Closing Balance' = NA, 'Debit Account' = NA, 
+                         
+                         'Credit Account' = '', 'Amount' = NA )
+  
+  asset_right_of_use_df_5 = bind_rows( asset_right_of_use_df_4, total_df )
+  
+  asset_right_of_use_df_5$Installment[ nrow( asset_right_of_use_df_5 ) ] = ''
+  
+  asset_right_of_use_df_5
+    
+})
+
+
+#..... Generating Liability table ....
+
+#... lease_liability_df_0 = my_cashflow_df_stored
+
+output$lease_liability_df = DT::renderDT({
+  
+  lease_liability_df_0 = RV_cashflow$my_cashflow_df_final
+  
+  lease_liability_df_1_firstrow = data.table( LeaseID = lease_liability_df_0$LeaseId[2], Installment = asset_right_of_use_df_0$Date[1],
+                                                 
+                                                 'Date' = 0, 'Lease Liability Opening Balance' = tail( lease_liability_df_0$Present_Value, 1 ),
+                                                 
+                                                 'Finance Cost' = 0, 'Lease Payments' = head( lease_liability_df_0$Present_Value, 1 ),
+                                                 
+                                                 'Debit Account' = '', 'Credit Account' = '' ) %>%
+    
+                                  mutate( 'Balance Liability' = .$'Lease Liability Opening Balance' + .$'Finance Cost' - .$'Lease Payments' ) %>%
+    
+                                  dplyr::select( 'LeaseID', 'Installment', 'Date', 'Lease Liability Opening Balance', 'Finance Cost',
+                   
+                                                 'Lease Payments', 'Balance Liability', 'Debit Account', 'Credit Account' )
+  
+  lease_liability_df_1_next_rows = tail( lease_liability_df_0, -1 ) %>% filter( Type == 'Rent' )
+  
+  lease_liability_df_2 = data.table( LeaseID = lease_liability_df_1_next_rows$LeaseId, Installment = lease_liability_df_1_next_rows$Date,
+                                        
+                                        Date = seq.int( 1, nrow( lease_liability_df_1_next_rows ), 1 ),
+                                        
+                                        'Lease Payments' = lease_liability_df_1_next_rows$Lease_Rental,
+                                        
+                                        'Debit Account' = 'Interest Expense', 'Credit Account' = 'Lease Liability' ) %>%
+    
+                        mutate( installment_diff = as.numeric( c( lease_liability_df_0$Date[2] - lease_liability_df_0$Date[1], diff( Installment ) ) ) )
+  
+  lease_liab_open_bal = finance_cost = bal_liab = NULL
+  
+  incremental_borrowing_rate_0 = ifelse( is.null( input$add_lease_incremental_borrowing_rate ), my_lease_df_stored$Incremental_Borrowing_Rate_perc, input$add_lease_incremental_borrowing_rate )
+  
+  for( i in 1:nrow( lease_liability_df_2 ) ){
+    
+    if( i == 1 ){
+      
+      lease_liab_open_bal[i] = lease_liability_df_1_firstrow$`Balance Liability`
+      
+    } else{
+      
+      lease_liab_open_bal[i] = bal_liab[i-1]
+      
+    }
+    
+    finance_cost[i] = lease_liab_open_bal[i]*exp( ( incremental_borrowing_rate_0/( 100*365 ) )*lease_liability_df_2$installment_diff[i] ) - lease_liab_open_bal[i]
+    
+    bal_liab[i] = lease_liab_open_bal[i] + finance_cost[i] - lease_liability_df_2$`Lease Payments`[i]
+    
+  }
+  
+  lease_liability_df_3  = lease_liability_df_2 %>% mutate( 'Lease Liability Opening Balance' = lease_liab_open_bal,
+                                                           
+                            'Finance Cost' = finance_cost, 'Balance Liability' = bal_liab ) %>% dplyr::select( -installment_diff ) %>%
+    
+                          dplyr::select( 'LeaseID', 'Installment', 'Date', 'Lease Liability Opening Balance', 'Finance Cost',
+                                         
+                                         'Lease Payments', 'Balance Liability', 'Debit Account', 'Credit Account' )
+  
+  lease_liability_df_4 = bind_rows( lease_liability_df_1_firstrow, lease_liability_df_3 )
+  
+  #.... Last 2 rows ...
+  
+  lease_liab_last_2_rows = data.table( LeaseId = '', Installment = tail( lease_liability_df_0, 3 )$Date[1:2],
+                                       
+                                       Date = '', 
+                                       
+                                       'Lease Liability Opening Balance' = c( tail( lease_liability_df_4$`Balance Liability` ), tail( lease_liability_df_0, 2 )$Lease_Rental[1] ),
+                                       
+                                       'Finance Cost' = rep( 0, 2 ), 'Lease Payments' = tail( lease_liability_df_0, 3 )$Lease_Rental[1:2],
+                                       
+                                       'Debit Account' = '', 'Credit Account' = ''  )
+  
+  
+})
 
 
 
