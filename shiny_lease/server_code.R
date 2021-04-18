@@ -188,7 +188,7 @@ output$lease_liability_df = DT::renderDT({
   
   lease_liability_df_0 = RV_cashflow$my_cashflow_df_final
   
-  lease_liability_df_1_firstrow = data.table( LeaseID = lease_liability_df_0$LeaseId[2], Installment = asset_right_of_use_df_0$Date[1],
+  lease_liability_df_1_firstrow = data.table( LeaseID = lease_liability_df_0$LeaseId[2], Installment = lease_liability_df_0$Date[1],
                                                  
                                                  'Date' = 0, 'Lease Liability Opening Balance' = tail( lease_liability_df_0$Present_Value, 1 ),
                                                  
@@ -216,7 +216,7 @@ output$lease_liability_df = DT::renderDT({
   
   lease_liab_open_bal = finance_cost = bal_liab = NULL
   
-  incremental_borrowing_rate_0 = ifelse( is.null( input$add_lease_incremental_borrowing_rate ), my_lease_df_stored$Incremental_Borrowing_Rate_perc, input$add_lease_incremental_borrowing_rate )
+  incremental_borrowing_rate_0 = ifelse( is.na( input$add_lease_incremental_borrowing_rate ), my_lease_df_stored$Incremental_Borrowing_Rate_perc, input$add_lease_incremental_borrowing_rate )
   
   for( i in 1:nrow( lease_liability_df_2 ) ){
     
@@ -248,16 +248,47 @@ output$lease_liability_df = DT::renderDT({
   
   #.... Last 2 rows ...
   
-  lease_liab_last_2_rows = data.table( LeaseId = '', Installment = tail( lease_liability_df_0, 3 )$Date[1:2],
+  lease_liab_last_2_rows = data.table( LeaseID = '', Installment = tail( lease_liability_df_0, 3 )$Date[1:2],
                                        
-                                       Date = '', 
+                                       Date = -1, 
                                        
-                                       'Lease Liability Opening Balance' = c( tail( lease_liability_df_4$`Balance Liability` ), tail( lease_liability_df_0, 2 )$Lease_Rental[1] ),
+                                       'Lease Liability Opening Balance' = c( tail( lease_liability_df_4$`Balance Liability`, 1 ), tail( lease_liability_df_0, 2 )$Lease_Rental[1] ),
                                        
                                        'Finance Cost' = rep( 0, 2 ), 'Lease Payments' = tail( lease_liability_df_0, 3 )$Lease_Rental[1:2],
                                        
-                                       'Debit Account' = '', 'Credit Account' = ''  )
+                                       'Debit Account' = '', 'Credit Account' = ''  ) %>%
+    
+                          mutate( 'Balance Liability' = .$'Lease Liability Opening Balance' + .$'Finance Cost' - .$'Lease Payments' ) %>%
+    
+                         dplyr::select( 'LeaseID', 'Installment', 'Date', 'Lease Liability Opening Balance', 'Finance Cost',
+                   
+                                        'Lease Payments', 'Balance Liability', 'Debit Account', 'Credit Account' )
   
+  lease_liability_df_5 = bind_rows( lease_liability_df_4, lease_liab_last_2_rows )
+  
+  #..... Total row .....
+  
+  total_row = data.table( LeaseID = '', Installment = Sys.Date(), Date = -1, 'Lease Liability Opening Balance' = -1, 'Finance Cost' = -1,
+                          
+                          'Lease Payments' = sum( lease_liability_df_5$`Lease Payments`, na.rm = T ), 'Balance Liability' = -1, 'Debit Account' = '', 'Credit Account' = '' )
+  
+  lease_liability_df_6 = bind_rows( lease_liability_df_5, total_row )
+  
+  lease_liability_df_6$`Lease Liability Opening Balance` = round( lease_liability_df_6$`Lease Liability Opening Balance` )
+  
+  lease_liability_df_6$`Finance Cost` = round( lease_liability_df_6$`Finance Cost` )
+  
+  lease_liability_df_6$`Balance Liability` = round( lease_liability_df_6$`Balance Liability` )
+  
+  lease_liability_df_6$Date[ which( lease_liability_df_6$Date == -1 ) ] = ''
+  
+  lease_liability_df_6$`Lease Liability Opening Balance`[ which( lease_liability_df_6$`Lease Liability Opening Balance` == -1 ) ] = ''
+  
+  lease_liability_df_6$`Finance Cost`[ which( lease_liability_df_6$`Finance Cost` == -1 ) ] = ''
+  
+  lease_liability_df_6$`Balance Liability`[ which( lease_liability_df_6$`Balance Liability` == -1 ) ] = ''
+  
+  return( lease_liability_df_6 )
   
 })
 

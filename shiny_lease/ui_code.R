@@ -138,7 +138,7 @@ app_body =  dashboardBody(
                     
                     column( 2, numericInput( 'add_lease_gst', 'GST (%)', value = 0 ) ),
                     
-                    column( 2, numericInput( 'add_lease_incremental_borrowing_rate', 'Incremental Borrowing Rate (%)', value = 0 ) ),
+                    column( 2, numericInput( 'add_lease_incremental_borrowing_rate', 'Incremental Borrowing Rate (%)', value = NULL ) ),
                     
                     column( 2, numericInput( 'add_lease_escalation_percent', 'Escalation Percent (%)', value = 0 ) ),
                     
