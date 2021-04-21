@@ -39,5 +39,31 @@ my_cashflow_df_stored = Generate_Cash_Flows( tail( my_lease_df_stored, 1 ) )
 # asset_right_of_use_df = Generate_Asset_Right_to_Use( my_cashflow_df_stored )
 
 
+#..... Read my advance df ...
+
+if( !file.exists( 'my_advances_df_stored.csv' ) ){
+  
+  my_advances_df_stored = data.frame()
+  
+} else{
+  
+  my_advances_df_stored = fread( 'my_advances_df_stored.csv' )
+  
+}
+
+
+#..... Read lease deposit df ...
+
+if( !file.exists( 'my_lease_deposit_df_stored.csv' ) ){
+  
+  my_lease_deposit_stored = data.frame()
+  
+} else{
+  
+  my_lease_deposit_stored = fread( 'my_lease_deposit_df_stored.csv' )
+  
+}
+
+
 
 

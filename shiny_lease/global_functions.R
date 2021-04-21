@@ -83,12 +83,123 @@ Generate_Cash_Flows = function( lease_df_input ){
 }
 
 
-#..... Function to generate asset right to use ....
+#..... Function to generate lease deposit ....
 
-#.... lease_df_input = tail( my_lease_df_stored, 1 )
+#.... my_advances_df_input = tail( my_advances_df_stored, 1 )  ;  lease_df_input = tail( my_lease_df_stored, 1 )
 
-# Generate_Asset_Right_to_Use
-
+Generate_Lease_Deposit = function( my_advances_df_input, lease_df_input ){
+  
+  if( ( nrow( lease_df_input ) > 0 ) & ( nrow( my_advances_df_input ) > 0 ) ){
+    
+    lease_payment_freq = switch( lease_df_input$`Lease_Payment_Frequency`,
+                                 
+                                 'monthly' = 'month', 'quarterly' = 'quarter', 'half_yearly' = '6 months', 'yearly' = 'year'
+                                 
+                                 )
+    
+    lease_deposit_df = data.table( LeaseId = lease_df_input$`Lease_ID`, 
+                              
+                              Date = seq.Date( as.Date( lease_df_input$`Rent_Effective_Date`, format="%d-%m-%Y" ),
+                                               
+                                               as.Date( lease_df_input$`End_Date`, format="%d-%m-%Y" ), lease_payment_freq ), 'Lease Deposit' = -1 ) 
+      
+    if( lease_df_input$`Lease_Payable_At` == 'end' ){
+      
+      lease_deposit_df$Date = LastDayInMonth( lease_deposit_df$Date )
+      
+    } else{ lease_deposit_df$Date = lubridate::floor_date( lease_deposit_df$Date, 'month' ) }
+    
+    lease_deposit_df = lease_deposit_df %>%
+      
+      mutate( 'Installment' = 1:nrow( lease_deposit_df ),
+        
+              'Discount Factor' = exp( -( ( my_advances_df_input$Risk_Free_Rate + my_advances_df_input$Credit_Spread )/( 100*365 ) )*( as.integer( ( Date - as.Date( lease_df_input$`Rent_Effective_Date`, format="%d-%m-%Y" ) ) ) ) ), 
+              
+              'Right to Use deposit' = -1, 'Debit Account' = 'Deposit - Asset', 'Credit Account' = 'Interest Income', 'Present Value' = -1 ) %>% as.data.frame() # %>%
+      
+          #    dplyr::select( LeaseId, Date, Installment, 'Lease Deposit', 'Discount Factor', 'Present Value', 'Right to Use deposit', 'Debit Account', 'Credit Account' )
+    
+    first_row = data.table( LeaseId = lease_df_input$`Lease_ID`, Date = as.Date( lease_df_input$`Initial_Application_Date`, format="%d-%m-%Y" ),
+                            
+                            Installment = 0, 'Lease Deposit' = my_advances_df_input$Lease_Advance ) %>%
+                            
+                            mutate( 'Discount Factor' = exp( -( ( my_advances_df_input$Risk_Free_Rate + my_advances_df_input$Credit_Spread )/( 100*365 ) )*( as.integer( ( tail( lease_deposit_df$Date, 1 ) - as.Date( lease_df_input$`Rent_Effective_Date`, format="%d-%m-%Y" ) ) ) ) ) ) %>%
+                            
+                            mutate( 'Present Value' = round( .$'Lease Deposit'*.$'Discount Factor' ), 'Amortization' = 0, 'Imputed interest on deposit' = '',
+                                    
+                                    'Debit Account' = 'Deposit - Asset', 'Credit Account' = 'Bank Account' ) %>% 
+      
+                            mutate( 'Carrying value of deposit' = .$'Present Value', Amount = .$'Lease Deposit',
+                                    
+                                    'Right to Use deposit' = round( .$'Lease Deposit' - .$'Present Value' ) ) %>% as.data.frame()
+    
+    lease_deposit_df_1 = bind_rows( first_row, lease_deposit_df )
+    
+    lease_deposit_df_1$date_diff = c( NA, diff( lease_deposit_df_1$Date ) )
+    
+    car_val_deposit = NULL
+    
+    for( i in 1:nrow( lease_deposit_df_1 ) ){
+      
+      if( i == 1 ){ car_val_deposit[i] = lease_deposit_df_1$`Carrying value of deposit`[1] } else{
+        
+        car_val_deposit[i] = car_val_deposit[i-1]*exp( ( ( my_advances_df_input$Risk_Free_Rate + my_advances_df_input$Credit_Spread )/( 100*365 ) )*lease_deposit_df_1$date_diff[i] )
+        
+      }
+      
+    }
+    
+    lease_deposit_df_1$`Carrying value of deposit` = round( car_val_deposit )
+    
+    lease_deposit_df_1$`Imputed interest on deposit` = c( -1, round( diff( lease_deposit_df_1$`Carrying value of deposit` ) ) )
+    
+    lease_deposit_df_1$Amortization[ is.na( lease_deposit_df_1$Amortization ) ] = round( head( lease_deposit_df_1$`Right to Use deposit`, 1 )/tail( lease_deposit_df_1$Installment, 1 ) )
+    
+    lease_deposit_df_1$Amount = lease_deposit_df_1$`Imputed interest on deposit`
+    
+    lease_deposit_df_1$Amount[1] = lease_deposit_df_1$`Lease Deposit`[1]
+    
+    lease_deposit_df_2 = lease_deposit_df_1 %>% dplyr::select( LeaseId, Date, Installment, 'Lease Deposit', 'Discount Factor', 'Present Value',
+                                                        
+                                                        'Carrying value of deposit', 'Imputed interest on deposit', 'Right to Use deposit',
+                                                        
+                                                        'Amortization', 'Debit Account', 'Credit Account', 'Amount' )
+    
+    #.... Total row ....
+    
+    total_row = data.table( LeaseId = '', Date = lease_deposit_df_2$Date[1], Installment = -1, 'Lease Deposit' = lease_deposit_df_1$`Lease Deposit`[1],
+                            
+                            'Discount Factor' = -1, 'Present Value' = lease_deposit_df_2$`Present Value`[1], 'Carrying value of deposit' = -1, 
+                            
+                            'Imputed interest on deposit' = sum( as.numeric( lease_deposit_df_2$`Imputed interest on deposit` ), na.rm = T ),
+                            
+                            'Right to Use deposit' = -1, 'Amortization' = sum( as.numeric( lease_deposit_df_2$Amortization, na.rm = T ) ),
+                            
+                            'Debit Account' = '', 'Credit Account' = '', Amount = -1 )
+    
+    lease_deposit_df_final = bind_rows( lease_deposit_df_2, total_row )
+    
+    lease_deposit_df_final$Installment[ lease_deposit_df_final$Installment == -1 ] = ''
+    
+    lease_deposit_df_final$`Lease Deposit`[ lease_deposit_df_final$`Lease Deposit` == -1 ] = ''
+    
+    lease_deposit_df_final$`Present Value`[ lease_deposit_df_final$`Present Value` == -1 ] = ''
+    
+    lease_deposit_df_final$`Carrying value of deposit`[ nrow( lease_deposit_df_final ) ] = ''
+    
+    lease_deposit_df_final$`Right to Use deposit`[ lease_deposit_df_final$`Right to Use deposit` == -1 ] = ''
+    
+    lease_deposit_df_final$`Imputed interest on deposit`[1] = ''
+    
+    return( lease_deposit_df_final )
+    
+  } else{
+    
+    return( data.frame() )
+    
+  }
+  
+}
 
 
 

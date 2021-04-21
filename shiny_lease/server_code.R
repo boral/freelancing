@@ -293,5 +293,65 @@ output$lease_liability_df = DT::renderDT({
 })
 
 
+#..... Generating advances table ....
+
+RV_advances_table = reactiveValues( my_advances_df_final = my_advances_df_stored )
+
+output$my_advance_df = DT::renderDT({
+  
+  RV_advances_table$my_advances_df_final
+  
+})
+
+
+observeEvent( input$my_advance_upload_button, {
+  
+  uploaded_my_advance_df = read.csv( input$my_advance$datapath )
+  
+  fwrite( uploaded_my_advance_df, 'my_advances_df_stored.csv' )
+  
+  RV_advances_table$my_advances_df_final = fread( 'my_advances_df_stored.csv' )
+  
+})
+
+
+#.... Generating Lease Deposit Table ....
+
+
+RV_lease_deposit = reactiveValues( my_lease_deposit_final = my_lease_deposit_stored )
+
+output$lease_liability_df = DT::renderDT({
+  
+  RV_lease_deposit$my_lease_deposit_final
+  
+})
+
+# observeEvent( input$add_lease_submit_button, { 
+#   
+#   RV_lease_deposit$my_cashflow_df_final = Generate_Cash_Flows( tail( RV$my_lease_df_final, 1 ) )
+#   
+# })
+
+observeEvent( input$my_advance_upload_button, {
+  
+  RV_lease_deposit$my_lease_deposit_final = Generate_Lease_Deposit( tail( RV_advances_table$my_advances_df_final, 1 ), tail( RV$my_lease_df_final, 1 ) )
+  
+  fwrite( RV_lease_deposit$my_lease_deposit_final, 'my_lease_deposit_df_stored.csv' )
+  
+})
+
+
+#..... Generating Asset - Right to use table ....
+
+#... right_to_use_deposit_df_0 = my_lease_deposit_stored
+
+output$right_to_use_deposit_df = DT::renderDT({
+  
+  right_to_use_deposit_df_0 = RV_lease_deposit$my_lease_deposit_final
+  
+})
+
+
+
 
 

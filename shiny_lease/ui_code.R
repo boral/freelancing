@@ -15,6 +15,11 @@ app_sidebar =  dashboardSidebar( collapsed = F,
                                            menuSubItem( 'My Lease', tabName = 'my_lease', selected = T )
                                   ),
                                   
+                                  menuItem( strong( '  Advances' ), startExpanded = TRUE,
+                                            
+                                            menuSubItem( 'My Advances', tabName = 'my_advances', selected = T )
+                                  ),
+                                  
                                   menuItem( strong( '  Cash Flows' ), startExpanded = TRUE,
                                             
                                             menuSubItem( 'My Cash Flows', tabName = 'my_cash_flows' )
@@ -22,9 +27,14 @@ app_sidebar =  dashboardSidebar( collapsed = F,
                                   
                                   menuItem( strong( '  Calculations' ), startExpanded = TRUE,
                                             
+                                            menuSubItem( 'Lease Deposits', tabName = 'lease_deposits' ),
+                                            
                                             menuSubItem( 'Asset Right-of-Use', tabName = 'asset_right_of_use' ),
                                             
-                                            menuSubItem( 'Lease Liability', tabName = 'lease_liability' )
+                                            menuSubItem( 'Lease Liability', tabName = 'lease_liability' ),
+                                            
+                                            menuSubItem( 'Right to Use Deposit', tabName = 'right_to_use_deposit' )
+                                            
                                   )
                                          
                                 )
@@ -218,6 +228,38 @@ app_body =  dashboardBody(
              
     ),
     
+    tabItem( tabName = 'my_advances',
+             
+             fluidRow(
+               
+               box( title = 'Upload My Advances', status = 'success', width = 12, solidHeader = T, collapsible = T,
+                    
+                    column( 8, fileInput( 'my_advance', 'Upload Advance file' ) ), br(),
+                    
+                    column( 2, align = 'left',
+                            
+                            actionButton( 'my_advance_upload_button', 'SUBMIT' ),
+                            
+                            tags$style( "#my_advance_upload_button { vertical-align: middle; height: 30px; width: 70%; font-size: 15px;color: white;background-color:#1B618D;border-color: #374645 }" )
+                            
+                    )
+                    
+               )
+               
+             ),
+             
+             fluidRow(
+               
+               box( title = 'My Advance', status = 'success', collapsible = T, width = 12, solidHeader = T,
+                    
+                    column( 12, DT::dataTableOutput( outputId = "my_advance_df" ), style = "height:500px; overflow-y: scroll;overflow-x: scroll;" )
+                    
+               )
+               
+             )
+             
+    ),
+    
     tabItem( tabName = 'my_cash_flows',
              
              fluidRow(
@@ -249,6 +291,30 @@ app_body =  dashboardBody(
                box( title = 'Lease Liability', status = 'success', collapsible = T, width = 12, solidHeader = T,
                     
                     DT::dataTableOutput( outputId = "lease_liability_df" ) )
+               
+             )
+             
+    ),
+    
+    tabItem( tabName = 'lease_deposits',
+             
+             fluidRow(
+               
+               box( title = 'Lease Deposits', status = 'success', collapsible = T, width = 12, solidHeader = T,
+                    
+                    DT::dataTableOutput( outputId = "lease_deposits_df" ) )
+               
+             )
+             
+    ),
+    
+    tabItem( tabName = 'right_to_use_deposit',
+             
+             fluidRow(
+               
+               box( title = 'Right to Use deposit', status = 'success', collapsible = T, width = 12, solidHeader = T,
+                    
+                    DT::dataTableOutput( outputId = "right_to_use_deposit_df" ) )
                
              )
              
