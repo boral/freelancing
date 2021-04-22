@@ -349,6 +349,32 @@ output$right_to_use_deposit_df = DT::renderDT({
   
   right_to_use_deposit_df_0 = RV_lease_deposit$my_lease_deposit_final
   
+  right_to_use_deposit_df_first_row = data.table( LeaseId = right_to_use_deposit_df_0$LeaseId[1], Installment = right_to_use_deposit_df_0$Date[1],
+                                                  
+                                                  Date = 0, 'Right to use Imputed deposit' = right_to_use_deposit_df_0$`Right to Use deposit`[1],
+                                                  
+                                                  'Amortisation of RTU' = 0, 'Right to use Closing Balance' = right_to_use_deposit_df_0$`Right to Use deposit`[1],
+                                                  
+                                                  'Debit Account' = 'Right to Use - Deposit', 'Credit Account' = 'Deposit - Asset', 'Amount' = right_to_use_deposit_df_0$`Right to Use deposit`[1] )
+  
+  right_to_use_deposit_df_next_rows = tail( right_to_use_deposit_df_0, -1 ) %>% filter( .$'Credit Account' == 'Interest Income' )
+  
+  right_to_use_deposit_df_2 = data.table( LeaseId = right_to_use_deposit_df_next_rows$LeaseId, Installment = right_to_use_deposit_df_next_rows$Date,
+                                          
+                                          Date = right_to_use_deposit_df_next_rows$Installment, 'Amortisation of RTU' = right_to_use_deposit_df_next_rows$Amortization,
+                                          
+                                          'Debit Account' = 'Depreciation', 'Credit Account' = 'Right to Use - Deposit' ) %>%
+    
+    mutate( 'Right to use Closing Balance' = right_to_use_deposit_df_0$`Right to Use deposit`[1] - cumsum( .$'Amortisation of RTU' ) ) %>%
+    
+    mutate( 'Right to use Imputed deposit' = shift( .$'Right to use Closing Balance' ), 'Amount' = .$'Amortisation of RTU' )
+  
+  right_to_use_deposit_df_2$`Right to use Imputed deposit`[1] = right_to_use_deposit_df_first_row$`Right to use Imputed deposit`
+  
+  right_to_use_deposit_df_final = bind_rows( right_to_use_deposit_df_first_row, right_to_use_deposit_df_2 )
+  
+  right_to_use_deposit_df_final
+  
 })
 
 
