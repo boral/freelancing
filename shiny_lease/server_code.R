@@ -216,7 +216,9 @@ output$lease_liability_df = DT::renderDT({
   
   lease_liab_open_bal = finance_cost = bal_liab = NULL
   
-  incremental_borrowing_rate_0 = ifelse( is.na( input$add_lease_incremental_borrowing_rate ), my_lease_df_stored$Incremental_Borrowing_Rate_perc, input$add_lease_incremental_borrowing_rate )
+  # incremental_borrowing_rate_0 = my_lease_df_stored$Incremental.Borrowing.Rate
+  
+  incremental_borrowing_rate_0 = ifelse( is.na( input$add_lease_incremental_borrowing_rate ), my_lease_df_stored$Incremental.Borrowing.Rate, input$add_lease_incremental_borrowing_rate )
   
   for( i in 1:nrow( lease_liability_df_2 ) ){
     
@@ -320,7 +322,7 @@ observeEvent( input$my_advance_upload_button, {
 
 RV_lease_deposit = reactiveValues( my_lease_deposit_final = my_lease_deposit_stored )
 
-output$lease_liability_df = DT::renderDT({
+output$lease_deposits_df = DT::renderDT({
   
   RV_lease_deposit$my_lease_deposit_final
   
@@ -351,11 +353,11 @@ output$right_to_use_deposit_df = DT::renderDT({
   
   right_to_use_deposit_df_first_row = data.table( LeaseId = right_to_use_deposit_df_0$LeaseId[1], Installment = right_to_use_deposit_df_0$Date[1],
                                                   
-                                                  Date = 0, 'Right to use Imputed deposit' = right_to_use_deposit_df_0$`Right to Use deposit`[1],
+                                                  Date = '0', 'Right to use Imputed deposit' = right_to_use_deposit_df_0$`Right to Use deposit`[1],
                                                   
-                                                  'Amortisation of RTU' = 0, 'Right to use Closing Balance' = right_to_use_deposit_df_0$`Right to Use deposit`[1],
+                                                  'Amortisation of RTU' = 0, 'Right to use Closing Balance' = as.numeric( right_to_use_deposit_df_0$`Right to Use deposit`[1] ),
                                                   
-                                                  'Debit Account' = 'Right to Use - Deposit', 'Credit Account' = 'Deposit - Asset', 'Amount' = right_to_use_deposit_df_0$`Right to Use deposit`[1] )
+                                                  'Debit Account' = 'Right to Use - Deposit', 'Credit Account' = 'Deposit - Asset', 'Amount' = as.numeric( right_to_use_deposit_df_0$`Right to Use deposit`[1] ) )
   
   right_to_use_deposit_df_next_rows = tail( right_to_use_deposit_df_0, -1 ) %>% filter( .$'Credit Account' == 'Interest Income' )
   
@@ -365,10 +367,11 @@ output$right_to_use_deposit_df = DT::renderDT({
                                           
                                           'Debit Account' = 'Depreciation', 'Credit Account' = 'Right to Use - Deposit' ) %>%
     
-    mutate( 'Right to use Closing Balance' = right_to_use_deposit_df_0$`Right to Use deposit`[1] - cumsum( .$'Amortisation of RTU' ) ) %>%
-    
+    mutate( 'Right to use Closing Balance' = as.numeric( right_to_use_deposit_df_0$`Right to Use deposit`[1] ) - cumsum( .$'Amortisation of RTU' ) ) %>%
+
     mutate( 'Right to use Imputed deposit' = shift( .$'Right to use Closing Balance' ), 'Amount' = .$'Amortisation of RTU' )
   
+
   right_to_use_deposit_df_2$`Right to use Imputed deposit`[1] = right_to_use_deposit_df_first_row$`Right to use Imputed deposit`
   
   right_to_use_deposit_df_final = bind_rows( right_to_use_deposit_df_first_row, right_to_use_deposit_df_2 )
