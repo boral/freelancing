@@ -18,7 +18,9 @@ Generate_Cash_Flows = function( lease_df_input ){
                                              
                                              as.Date( lease_df_input$`End.Date`, format="%d-%m-%Y" ), lease_payment_freq ), Type = 'Rent' ) %>% mutate( 
                             
-                            'Lease_Rental' = lease_df_input$Rent*( ( 1 + lease_df_input$`Escalation.Percent`/100 )^( as.integer( ( Date - as.Date( lease_df_input$`Rent.Effective.Date`, format="%d-%m-%Y" ) ) )%/%365 ) ), 
+                    #        'Lease_Rental' = lease_df_input$Rent*( ( 1 + lease_df_input$`Escalation.Percent`/100 )^( as.integer( ( Date - as.Date( lease_df_input$`Rent.Effective.Date`, format="%d-%m-%Y" ) ) )%/%365 ) ),
+                            
+                            'Lease_Rental' = lease_df_input$Rent*( ( 1 + lease_df_input$`Escalation.Percent`/100 )^( as.integer( ( Date - as.Date( lease_df_input$`Rent.Effective.Date`, format="%d-%m-%Y" ) ) )%/%( 30*lease_df_input$Escalation.Tenure ) ) ), 
                             
                             'Upfront_Cost' = 0 ) %>% as.data.frame()
   
