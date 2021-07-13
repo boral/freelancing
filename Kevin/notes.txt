@@ -1,0 +1,17 @@
+1) bug when page 2 is not displayed
+
+2) c31 == none in optinons
+
+3) ccate1_none / 2 can have two cs
+
+sum( audit )/sum( weight )
+
+count total = sum( audit )
+
+weight total = sum( weight )
+
+audit != 0
+
+c means hub
+
+month = # months between current month and Jan 2012
