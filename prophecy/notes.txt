@@ -1,0 +1,17 @@
+The log file contains the details of each experiment corresponding to unique experiment numbers. The 'O' column named 'Virus Particle' indicates whether it is a virus or control(no-virus) experiment. Corresponding to each experiment mentioned in the log file there is a raw data file kept in the folder 'Raw Data From Droplet Experiments' organized date wise.
+
+Each raw data file includes the following 6 columns:
+
+    'datetime' - local date- time
+
+    'frequency11' - sensor response (data to consider)
+
+    'humidity1' - to be ignored
+
+    'state1' - flag for event [event: addition of control media with or without virus]
+
+    a. 1- pre event state
+    b. 2 - during event state
+    c. 3- post event state
+    'temperature1' - to be ignored
+    'timestamp' - epoch time

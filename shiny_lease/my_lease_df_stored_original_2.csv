@@ -1,2 +1,0 @@
-Company,Valuation_Date,Initial_Application_Date,Lease_ID,Asset_Class,Lessor_Name,Address,Start_Date,End_Date,Upfront_Payments,Rent_Effective_Date,Rent,GST_perc,Incremental_Borrowing_Rate_perc,Escalation_Percent,Escalation_Tenure,Lease_Payment_Frequency,Lease_Payable_At,Dismantling_Cost,Date_of_Dismantling,Residual_Guarantee_Payments,Avail_Exemption,Exemption_Type,Transition_Method,Credit_Rating,Use_Cash_Flow
-asdf,31-03-2020,02-12-2019,asf,a,sdf,afsd,02-12-2019,31-07-2022,100000,02-12-2019,20000,0,9.31,10,12,monthly,end,50000,31-07-2022,30000,no,NA,modified_1,,no

@@ -1,9 +1,0 @@
-Company,Valuation Date,Lease ID,Initial Application Date,Asset Class,Lessor Name,Address,Start Date,End Date,Upfront Payments,Rent Effective Date,Rent,GST,Incremental Borrowing Rate,Escalation Percent,Escalation Tenure,Lease Payment Frequency,Lease Payable At,Dismantling Cost ,Date of dismantling,Residual Guarantee Payments,Avail Exemption,Exemption Type,Transition Method,Credit Rating,Use Cash Flow
-Boral,31-03-2021,Test Case1,02-12-2019,Office Rent,Kumar,Chennai,02-12-2019,31-07-2022,100000,02-12-2019,15000,0.00%,9.31,10,12,MONTHLY,END,30000,31-07-2022,50000,No,NA,Modified 1,,No
-Boral,31-03-2021,Test Case2,02-12-2019,Office Rent,Sriram,Delhi,02-12-2019,30-04-2022,100000,02-12-2019,45000,0,9.31,10,4,Quarterly,END,,,,No,NA,Modified 1,,No
-Boral,31-03-2021,Test Case3,02-12-2019,Office Rent,Ramesh,NELLORE,02-12-2019,31-05-2022,100000,02-12-2019,90000,0,9.31,10,2,Half Yearly,END,,,,No,NA,Modified 1,,No
-Boral,31-03-2021,Test Case4,02-12-2019,Office Rent,Ramesh,NELLORE,02-12-2019,30-11-2022,100000,02-12-2019,200000,0,9.31,10,1,Yearly,END,,,,No,NA,Modified 1,,No
-Boral,31-03-2021,Test Case5,01-11-2019,Office Rent,Ramesh,Chennai,01-11-2019,30-06-2022,0,01-11-2019,20000,0,9.31,5,12,Monthly,BEGINNING,50000,30-06-2022,30000,No,NA,Modified 1,,No
-Boral,31-03-2021,Test Case6,01-11-2019,Office Rent,Ramesh,Chennai,01-11-2019,30-06-2022,0,01-11-2019,60000,0,9.31,5,4,Quarterly,BEGINNING,,,,No,NA,Modified 1,,No
-Boral,31-03-2021,Test Case7,01-11-2019,Office Rent,Ramesh,Chennai,01-11-2019,30-09-2022,0,01-11-2019,120000,0,9.31,5,2,Half Yearly,BEGINNING,,,,No,NA,Modified 1,,No
-Boral,31-03-2021,Test Case8,01-11-2019,Office Rent,Ramesh,Chennai,01-11-2019,30-09-2022,0,01-11-2019,240000,0,9.31,5,1,Yearly,BEGINNING,,,,No,NA,Modified 1,,No
