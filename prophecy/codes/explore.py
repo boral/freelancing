@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import sweetviz as sv
+from datar.all import *
 import re
 
 os.chdir('E:\projects\prophecy')
@@ -18,11 +19,14 @@ df = []
 for file in files:
   df0 = pd.read_csv( 'E:\projects\prophecy\data' + '\\' + file )
   df0['Exp. No.'] = int( re.findall(r'\d+', file)[0] )
-  df1 = pd.merge( df0, log_df[[ 'Exp. No.', 'Virus Particle' ]], on = 'Exp. No.', how = 'left' )
+  df1 = pd.merge( df0, log_df[[ 'Exp. No.', 'Virus Particle', 'Initial Resistance (kΩ)', 'Test: Pre Nebulization Resistance (kΩ)',
+  'Test: Post Nebulization Resistance(kΩ)' ]], on = 'Exp. No.', how = 'left' )
   df.append( df1 )
 
 df = pd.concat( df )
 df.drop('Sequence', axis = 1 , inplace = True)
+
+df.to_csv( 'exp_df.csv', index = False )
 
 my_report = sv.analyze(df)
 my_report.show_html()
